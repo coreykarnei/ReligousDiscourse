@@ -1,34 +1,77 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Keyboard, Image } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import AgentView from './AgentView';
 
 const Debate = ({ navigation, route }) => {
     const [userInput, setUserInput] = useState('');
     const [selectedQuestion, setSelectedQuestion] = useState('');
     const [ chatMessages, setChatMessages ] = useState('');
-    const [ senderLog, setSenderLog ] = useState('');
     const scrollViewRef = React.useRef(null); 
+    const [agents, setAgents] = useState([
+      {
+        id: 'Jesus',
+        eagerness: 3, 
+        // image: require('./path_to_jesus_image.png'), // Path to the image file
+        nextMessage: 'next message here...', // The next message they would say
+        currentSpeaker: false
+      },
+      {
+        id: 'Buddha',
+        eagerness: 3,
+        // image: require('./path_to_buddha_image.png'),
+        nextMessage: 'next message here...',
+        currentSpeaker: false
+      },
+      {
+        id: 'Muhammad',
+        eagerness: 3,
+        // image: require('./path_to_muhammad_image.png'),
+        nextMessage: 'next message here...',
+        currentSpeaker: false
+      }
+    ]);
+    
+    useEffect(() => {
+      // Add passed in debate topic to chat history
+      setChatMessages([ { text: "Debate Topic:" + route.params.selectedQuestion, author: "user" }]);
+    }, [route.params]);
 
     const DebateTopic = ({ message }) => {
       return <Text style={styles.debateTopic}>{message}</Text>;
     };  
 
-    useEffect(() => {
-      // Check if the selectedQuestion parameter is passed in the route
-      if (route.params?.selectedQuestion) {
-        setSelectedQuestion(route.params.selectedQuestion);
-      }
-      setChatMessages([ { text: "Debate Topic:" + route.params.selectedQuestion, isUser: true }]);
-      setSenderLog([{sender: "User"}])
-    }, [route.params]);
-    
-
     const handleUserMessage = async () => {
         Keyboard.dismiss();
-        setChatMessages([...chatMessages, { text: "Debate Moderator:" + userInput, isUser: true }]);
-        setSenderLog([...senderLog, {sender: "User"}])
+        setChatMessages([...chatMessages, { text: "Debate Moderator:" + userInput, author: 'user' }]);
         setUserInput('');
+
+        // temporary filler message changes for agents
+        
       };
+
+    const getRandomEagerness = () => Math.floor(Math.random() * 5) + 1;
+
+    const handleAgentMessage = async (currentAgent) => {
+      setChatMessages([...chatMessages, { text: currentAgent.message, author: currentAgent.id }]);
+      setUserInput('');
+      
+      // temporary filler message changes for agents
+      const updatedAgents = agents.map(agent => {
+        if (agent.id === currentAgent.id) {
+          // Set currentSpeaker flag to true for the current agent
+          return { ...agent, currentSpeaker: true };
+        } else {
+          // Update eagerness and message for other agents
+          const newEagerness = getRandomEagerness(); // Assuming you have a function to get random eagerness
+          const newMessage = "temp rand string"; // Assuming you have a function to get a new message based on agent's id
+          return { ...agent, eagerness: newEagerness, message: newMessage, currentSpeaker: false };
+        }
+      });
+
+      setAgents(updatedAgents);
+    };
+      
 
   return (
     <View style={styles.container}>
@@ -42,9 +85,17 @@ const Debate = ({ navigation, route }) => {
         
         <DebateTopic message={"Debate Topic: " + route.params.selectedQuestion} />
 
+        {/* This is where the scrollview will go */}
+        {/* Inside the scrollview is where the logic for displaying the chat messages will be */}
 
-          
       </KeyboardAwareScrollView>
+
+      {/* AgentView component */}
+      <AgentView 
+        agents={agents} // Pass the array of agents with their details
+        onAgentSelect={handleAgentMessage} // Function to handle agent selection
+      />
+      
 
       <View style={styles.inputContainer}
       color="#FFFFFF"
@@ -128,6 +179,21 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     maxWidth: "95%",
     textAlign: "center",
+  },
+  agentContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  agentCircle: {
+    width: 50, // Adjust size as needed
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ADD8E6', // Example color
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  agentText: {
+    // Styling for the text or number inside the circle
   },
 
 });
