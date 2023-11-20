@@ -16,11 +16,13 @@ const Welcome = ({ navigation }) => {
       Alert.prompt(
         "Enter Your Topic",
         "Type your discussion topic:",
-        (text) => navigation.navigate('Chat', { userTopic: text })
+        (text) => {
+            navigation.navigate('Debate', { selectedQuestion: text }) ;
+        }
       );
-    } else {
-      // Navigate directly with the selected question
-      navigation.navigate('Chat', { selectedQuestion });
+    } else{ 
+        // Navigate to Debate page with the selected question
+        navigation.navigate('Debate', { selectedQuestion });
     }
   };
 

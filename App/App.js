@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import Welcome from './Welcome'; 
-import Chat from './Chat'; 
+import Debate from './Debate'; 
 import React from 'react';
 import * as Font from "expo-font";
 
@@ -51,8 +51,8 @@ export default function App() {
         }}>
         <Stack.Screen name="Welcome" component={Welcome} />
         <Stack.Screen 
-          name="Chat" 
-          component={Chat} 
+          name="Debate" 
+          component={Debate} 
           options={({ navigation }) => ({
             headerLeft: () => (
               <TouchableOpacity onPress={() => confirmBack(navigation)}>
