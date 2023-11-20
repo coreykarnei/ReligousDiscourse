@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 const windowHeight = Dimensions.get('window').height;
@@ -7,7 +7,22 @@ const windowWidth = Dimensions.get('window').width;
 
 
 const Welcome = ({ navigation }) => {
-  const [selectedQuestion, setSelectedQuestion] = React.useState("user");
+  const [selectedQuestion, setSelectedQuestion] = React.useState("I'll provide my own topic.");
+
+  const handleStartChatting = () => {
+    if (selectedQuestion === "I'll provide my own topic.") {
+      // Prompt user for discussion topic
+      // You can use a simple Alert or a custom modal for this
+      Alert.prompt(
+        "Enter Your Topic",
+        "Type your discussion topic:",
+        (text) => navigation.navigate('Chat', { userTopic: text })
+      );
+    } else {
+      // Navigate directly with the selected question
+      navigation.navigate('Chat', { selectedQuestion });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -25,22 +40,22 @@ const Welcome = ({ navigation }) => {
         onValueChange={(itemValue, itemIndex) =>
           setSelectedQuestion(itemValue)
         }>
-        <Picker.Item label="What does it mean to be happy?" value="lie" />
-        <Picker.Item label="Are humans innately good or evil?" value="lie" />
-        <Picker.Item label="Is it okay to lie to protect yourself?" value="lie" />
-        <Picker.Item label="Do all people deserve respect?" value="respect" />
-        <Picker.Item label="I'll provide my own topic." value="user" />
-        <Picker.Item label="What is the meaning of life?" value="life" />
-        <Picker.Item label="Why does suffering exist?" value="suffering" />
-        <Picker.Item label="What makes us human?" value="human" />
-        <Picker.Item label="Is ignorance really bliss?" value="ignorance" />
+        <Picker.Item label="What does it mean to be happy?" value="What does it mean to be happy?" />
+        <Picker.Item label="Are humans innately good or evil?" value="Are humans innately good or evil?" />
+        <Picker.Item label="Is it okay to lie to protect yourself?" value="Is it okay to lie to protect yourself?" />
+        <Picker.Item label="Do all people deserve respect?" value="Do all people deserve respect?" />
+        <Picker.Item label="I'll provide my own topic." value="I'll provide my own topic." />
+        <Picker.Item label="What is the meaning of life?" value="What is the meaning of life?" />
+        <Picker.Item label="Why does suffering exist?" value="Why does suffering exist?" />
+        <Picker.Item label="What makes us human?" value="What makes us human?" />
+        <Picker.Item label="Is ignorance really bliss?" value="Is ignorance really bliss?" />
       </Picker>
       
       {/* Navigation button example (commented out) */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
             style={styles.customButton} 
-            onPress={() => navigation.navigate('Chat')}
+            onPress={handleStartChatting}
         >
             <Text style={styles.buttonText}>Let the debate begin!</Text>
         </TouchableOpacity>
@@ -52,7 +67,7 @@ const Welcome = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Dark background color
+    backgroundColor: '#181818', // Dark background color
     alignItems: 'center',
     justifyContent: 'center',
     },  
@@ -72,7 +87,7 @@ const styles = StyleSheet.create({
   messageOptionsTitle: {
     color: '#FFFFFF', 
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 5,
     marginTop: 20,
   },
   buttonContainer: {
@@ -80,7 +95,7 @@ const styles = StyleSheet.create({
     width: '80%', // Adjust width as needed
   },
   customButton: {
-    marginTop: 20,
+    marginTop: 0,
     backgroundColor: '#007AFF', // Button color
     bottom: 0, 
     paddingVertical: 12,
@@ -94,8 +109,8 @@ const styles = StyleSheet.create({
   },
   picker: {
     width: windowWidth * 0.9,
-    height: windowHeight * 0.3,
-    backgroundColor: '#121212',
+    height: windowHeight * 0.25,
+    backgroundColor: '#181818',
     color: '#FFFFFF',
   },
   buttonText: {

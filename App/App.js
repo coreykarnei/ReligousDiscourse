@@ -1,14 +1,30 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import Welcome from './Welcome'; 
+import Chat from './Chat'; 
 import React from 'react';
 import * as Font from "expo-font";
 
+const Stack = createStackNavigator();
+
 export default function App() {
 
-  // const fetchFonts = async () =>
-  // await Font.loadAsync({
-  // 'FantaisieArtistique': require('/assets/fonts/FantaisieArtistique.ttf'),
-  // });
+  const confirmBack = (navigation) => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to go back?\nYour conversation will be cleared.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => navigation.goBack() }
+      ],
+      { cancelable: false }
+    );
+  };
 
   const [fontLoaded, setFontLoaded] = React.useState(false)
 
@@ -25,7 +41,28 @@ export default function App() {
 
   
   return (
-    <Welcome />
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#282828', // Custom background color
+          },
+          headerTintColor: '#fff', // Custom text color
+        }}>
+        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen 
+          name="Chat" 
+          component={Chat} 
+          options={({ navigation }) => ({
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => confirmBack(navigation)}>
+                <Text style={{ marginLeft: 10, color: '#fff' }}>Restart</Text>
+              </TouchableOpacity>
+            ),
+          })}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
