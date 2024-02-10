@@ -49,7 +49,15 @@ export default function App() {
           },
           headerTintColor: '#fff', // Custom text color
         }}>
-        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen 
+        name=" " 
+        options={{
+          headerStyle: {
+            height: 60, // Smaller height for welcome screen
+            backgroundColor: '#282828',
+          }
+        }} 
+        component={Welcome} />
         <Stack.Screen 
           name="Debate" 
           component={Debate} 

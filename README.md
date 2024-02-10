@@ -6,7 +6,7 @@
 
     React Native:
         Install Node.js and NPM (Node Package Manager):
-        Download and install the latest LTS version of Node.js from https://nodejs.org/en/
+        Download and install the latest LTS version of Node.js from https://nodejs.org/en/w
 
     Install Expo CLI:
         npm install -g expo-cli

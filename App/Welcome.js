@@ -28,8 +28,10 @@ const Welcome = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Divine</Text>
+        
         <Text style={styles.title}>Debates</Text>
       </View>
 
@@ -53,7 +55,7 @@ const Welcome = ({ navigation }) => {
         <Picker.Item label="Is ignorance really bliss?" value="Is ignorance really bliss?" />
       </Picker>
       
-      {/* Navigation button example (commented out) */}
+      {/* Navigation button example */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
             style={styles.customButton} 
@@ -74,13 +76,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     },  
   titleContainer: {
-    height: windowHeight * 0.2,
+    height: windowHeight * 0.24,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
   title: {
-    fontSize: windowHeight * 0.12, 
+    fontSize: windowHeight * 0.14,
     color: '#FFFFFF', 
     fontWeight: 'bold',
     textAlign: 'center',
