@@ -1,5 +1,67 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
+import LottieView from 'lottie-react-native';
+
+const ThinkingAnimation = () => {
+  const animationRef = useRef(null);
+  // Replace 100 with the actual total frame count of your thinking animation
+  const totalFrames = 240; // Update this to your animation's total frame count
+
+  useEffect(() => {
+    const randomFrameStart = Math.floor(Math.random() * totalFrames);
+    if (animationRef.current) {
+      animationRef.current.play(randomFrameStart, totalFrames);
+    }
+  }, [totalFrames]);
+
+  const handleAnimationFinish = (isCancelled) => {
+    if (!isCancelled) {
+      animationRef.current.play(0, totalFrames);
+    }
+  };
+
+  return (
+    <LottieView
+      ref={animationRef}
+      source={require('./assets/lottie/thinking.json')}
+      autoPlay
+      loop={false}
+      onAnimationFinish={handleAnimationFinish}
+      style={{ width: 35, height: 35 }}
+    />
+  );
+};
+
+const ReadingAnimation = () => {
+  const animationRef = useRef(null);
+  // Replace 100 with the actual total frame count of your thinking animation
+  const totalFrames = 165; // Update this to your animation's total frame count
+
+  useEffect(() => {
+    const randomFrameStart = Math.floor(Math.random() * totalFrames);
+    if (animationRef.current) {
+      animationRef.current.play(randomFrameStart, totalFrames);
+    }
+  }, [totalFrames]);
+
+  const handleAnimationFinish = (isCancelled) => {
+    if (!isCancelled) {
+      animationRef.current.play(0, totalFrames);
+    }
+  };
+
+  return (
+    <LottieView
+      ref={animationRef}
+      source={require('./assets/lottie/reading.json')}
+      autoPlay
+      loop={false}
+      onAnimationFinish={handleAnimationFinish}
+      style={{ width: 35, height: 35 }}
+    />
+  );
+};
+
 
 const getBackgroundColorForAgent = (agentName) => {
   switch (agentName) {
@@ -31,9 +93,9 @@ const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
 
   const getTextForAgent = (agent) => {
     if (anyAgentTyping) {
-      return `${agent.agentName} is reading`; // Removed the static ellipsis
+      return `${agent.agentName} is reading...`; // Removed the static ellipsis
     } else if (agent.thinking) {
-      return `${agent.agentName} is thinking`;
+      return `${agent.agentName} is thinking...`;
     } else {
       return `${agent.agentName}: ${agent.nextMessage.substring(0, 20)}`;
     }
@@ -44,13 +106,19 @@ const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
       {agents.filter(agent => !agent.currentSpeaker).map((agent, index) => (
         <View key={agent.agentName} style={styles.agentWrapper}>
           <View style={[styles.trim, { backgroundColor: getDarkerColorForAgent(agent.agentName) }]} />
-          <TouchableOpacity 
-            style={[styles.agentButton, { backgroundColor: getBackgroundColorForAgent(agent.agentName) }]} 
+          <TouchableOpacity
+            style={[styles.agentButton, { backgroundColor: getBackgroundColorForAgent(agent.agentName) }]}
             onPress={() => onAgentSelect(agent)}
           >
+            {anyAgentTyping ? (
+              <ReadingAnimation />
+            ) : agent.thinking ? (
+              <ThinkingAnimation />
+            ) : (
+              "brr"
+            )}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.agentText}>{getTextForAgent(agent)}</Text>
-              {(anyAgentTyping || agent.thinking) && <ActivityIndicator size="small" color="#0000ff" style={{ marginLeft: 8 }} />}
             </View>
           </TouchableOpacity>
           <View style={[styles.trim, { backgroundColor: getDarkerColorForAgent(agent.agentName) }]} />
@@ -65,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
   },
   agentWrapper: {
-    marginBottom: 3,
+    marginBottom: 2,
   },
   agentButton: {
     justifyContent: 'flex-start',

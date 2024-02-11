@@ -350,6 +350,7 @@ const styles = StyleSheet.create({
 
   chatContainer: {
     flex: 1,
+    marginBottom: 2
   },
   message: {
     margin: 10,
