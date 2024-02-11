@@ -6,17 +6,19 @@ import AgentView from './AgentView';
 const Debate = ({ navigation, route }) => {
   const [userInput, setUserInput] = useState('');
   const [partialResponse, setPartialResponse] = useState('');
-  const [selectedQuestion, setSelectedQuestion] = useState('');
   const [agentIsTyping, setAgentIsTyping] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const scrollViewRef = React.useRef(null);
   const [isUserTouching, setIsUserTouching] = useState(false);
+  const debateTopicRef = useRef(null);
+  const [dynamicPadding, setDynamicPadding] = useState(0);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const [agents, setAgents] = useState([
     {
       agentName: 'Jesus',
       eagerness: 3,
       // image: require('./path_to_jesus_image.png'), // Path to the image file
-      nextMessage: 'next message here...', // The next message they would say
+      nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
     },
@@ -40,12 +42,12 @@ const Debate = ({ navigation, route }) => {
 
   // keep scrolling to the bottom while output is being typed
   useEffect(() => {
-    if (scrollViewRef.current && !isUserTouching && agentIsTyping) {
+    if (scrollViewRef.current && !isUserTouching && agentIsTyping && isAtBottom) {
       setTimeout(() => {
         scrollViewRef.current.scrollToEnd({ animated: false });
-      }, 0); // You can adjust this delay
+      }, 0); // Adjusted delay for smoother animation
     }
-  }, [chatMessages, partialResponse, isUserTouching, agentIsTyping]);
+  }, [chatMessages, partialResponse, isUserTouching, agentIsTyping, isAtBottom]);
 
   // Add passed in debate topic to chat history
   // TODO: evaluate if we want this here
@@ -103,26 +105,41 @@ const Debate = ({ navigation, route }) => {
     }
   };
 
-  const getRandomEagerness = () => Math.floor(Math.random() * 5) + 1;
-
   const handleAgentMessage = async (currentAgent) => {
-    setChatMessages([...chatMessages, { text: currentAgent.message, author: currentAgent.agentName }]);
-    setUserInput('');
+    setAgentIsTyping(true);
 
-    // temporary filler message changes for agents
     const updatedAgents = agents.map(agent => {
       if (agent.agentName === currentAgent.agentName) {
         // Set currentSpeaker flag to true for the current agent
         return { ...agent, currentSpeaker: true };
       } else {
-        // Update eagerness and message for other agents
-        const newEagerness = getRandomEagerness(); // Assuming you have a function to get random eagerness
-        const newMessage = "temp rand string"; // Assuming you have a function to get a new message based on agent's id
-        return { ...agent, eagerness: newEagerness, message: newMessage, currentSpeaker: false };
+        return { ...agent, currentSpeaker: false };
       }
     });
-
     setAgents(updatedAgents);
+
+    const message = currentAgent.nextMessage;
+    for (let i = 1; i <= message.length; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 10)); // Adjust delay as needed
+      setPartialResponse(message.slice(0, i));
+    }
+
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      { text: message, author: currentAgent.agentName },
+    ]);
+
+    setPartialResponse('');
+    setAgentIsTyping(false);
+
+    // TODO: trigger the non-speakers to load a new nextMessage
+
+  };
+
+  const handleScroll = (event) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const isCloseToBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20; // 20 is a threshold
+    setIsAtBottom(isCloseToBottom);
   };
 
   const getMessageToShow = (msg, isTyping) => {
@@ -131,6 +148,9 @@ const Debate = ({ navigation, route }) => {
     }
     return msg.author + ": " + msg.text;
   };
+
+
+  const currentTypingAgent = agents.find(agent => agent.currentSpeaker === true);
 
   // Function to dynamically determine the style based on the agent's name
   const getStyleForAgent = (agentName) => {
@@ -157,14 +177,28 @@ const Debate = ({ navigation, route }) => {
         keyboardShouldPersistTaps="always"
       >
 
-        <DebateTopic message={"Debate Topic: " + route.params.selectedQuestion} />
+        {/* Overlay Container for DebateTopic */}
+        <View
+          style={styles.debateTopicOverlayContainer}
+          ref={debateTopicRef}
+          onLayout={() => {
+            debateTopicRef.current.measure((x, y, width, height, pageX, pageY) => {
+              // Now you have the height of the DebateTopic, and you can set the paddingTop dynamically
+              setDynamicPadding(height + 10); // For example, add 20 for extra spacing
+            });
+          }}
+        >
+          <DebateTopic message={route.params.selectedQuestion} />
+        </View>
 
         <ScrollView
           ref={scrollViewRef}
           style={styles.chatContainer}
-          contentContainerStyle={styles.chatContentContainer}
+          contentContainerStyle={[styles.chatContentContainer, { paddingTop: dynamicPadding }]}
+          onScroll={handleScroll}
           onScrollBeginDrag={() => setIsUserTouching(true)}
           onScrollEndDrag={() => setIsUserTouching(false)}
+          scrollEventThrottle={16} // Aim for 60fps updates
         >
           {chatMessages.map((msg, index) => (
 
@@ -178,9 +212,18 @@ const Debate = ({ navigation, route }) => {
                 </Text>
               </View>
             )
-
-
           ))}
+          {/* Conditionally render the partialResponse if an agent is typing */}
+          {agentIsTyping && (
+            <View style={styles.systemMessageContainer}>
+              {/* You might not need getMessageToShow for partialResponse, 
+          or you can adjust getMessageToShow to handle partial responses appropriately */}
+
+              <Text style={[styles.message, getStyleForAgent(currentTypingAgent.agentName)]}>
+                {currentTypingAgent.agentName}: {partialResponse}
+              </Text>
+            </View>
+          )}
           {/* This can be used for the blocks at the bottom */}
           {/* {gptJesusIsThinking && (
           <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
@@ -207,7 +250,7 @@ const Debate = ({ navigation, route }) => {
           style={styles.input}
           value={userInput}
           onChangeText={setUserInput}
-          placeholder="Type your message"
+          placeholder="Moderate the debate..."
           placeholderTextColor="#B3B3B3"
           onSubmitEditing={handleUserMessage}
         />
@@ -269,7 +312,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'rgb(255,255,255)',
   },
-
+  debateTopicOverlayContainer: {
+    position: 'absolute',
+    width: '100%',
+    alignItems: 'center',
+    zIndex: 1, // Make sure this overlays on top of the ScrollView
+  },
   debateTopic: {
     color: "#333",
     backgroundColor: "#f1f1f1",
@@ -280,7 +328,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 10,
     marginBottom: 5,
-    maxWidth: "95%",
+    maxWidth: "80%",
     textAlign: "center",
   },
   agentContainer: {
@@ -301,12 +349,6 @@ const styles = StyleSheet.create({
 
   chatContainer: {
     flex: 1,
-  },
-  gptJesusMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#f1f1f1',
-    color: '#333',
-    maxWidth: "70%"
   },
   message: {
     margin: 10,
