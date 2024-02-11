@@ -32,6 +32,18 @@ const ThinkingAnimation = () => {
   );
 };
 
+const IdeaAnimation = () => {
+
+  return (
+    <LottieView
+      source={require('./assets/lottie/lightbulb.json')}
+      autoPlay
+      loop={true}
+      style={{ width: 45, height: 45 }}
+    />
+  );
+};
+
 const ReadingAnimation = () => {
   const animationRef = useRef(null);
   // Replace 100 with the actual total frame count of your thinking animation
@@ -115,7 +127,7 @@ const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
             ) : agent.thinking ? (
               <ThinkingAnimation />
             ) : (
-              "brr"
+              <IdeaAnimation />
             )}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.agentText}>{getTextForAgent(agent)}</Text>
