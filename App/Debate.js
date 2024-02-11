@@ -4,115 +4,218 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import AgentView from './AgentView';
 
 const Debate = ({ navigation, route }) => {
-    const [userInput, setUserInput] = useState('');
-    const [selectedQuestion, setSelectedQuestion] = useState('');
-    const [ chatMessages, setChatMessages ] = useState('');
-    const scrollViewRef = React.useRef(null); 
-    const [agents, setAgents] = useState([
-      {
-        id: 'Jesus',
-        eagerness: 3, 
-        // image: require('./path_to_jesus_image.png'), // Path to the image file
-        nextMessage: 'next message here...', // The next message they would say
-        currentSpeaker: false
-      },
-      {
-        id: 'Buddha',
-        eagerness: 3,
-        // image: require('./path_to_buddha_image.png'),
-        nextMessage: 'next message here...',
-        currentSpeaker: false
-      },
-      {
-        id: 'Muhammad',
-        eagerness: 3,
-        // image: require('./path_to_muhammad_image.png'),
-        nextMessage: 'next message here...',
-        currentSpeaker: false
-      }
-    ]);
-    
-    useEffect(() => {
-      // Add passed in debate topic to chat history
-      setChatMessages([ { text: "Debate Topic:" + route.params.selectedQuestion, author: "user" }]);
-    }, [route.params]);
+  const [userInput, setUserInput] = useState('');
+  const [partialResponse, setPartialResponse] = useState('');
+  const [selectedQuestion, setSelectedQuestion] = useState('');
+  const [agentIsTyping, setAgentIsTyping] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const scrollViewRef = React.useRef(null);
+  const [isUserTouching, setIsUserTouching] = useState(false);
+  const [agents, setAgents] = useState([
+    {
+      agentName: 'Jesus',
+      eagerness: 3,
+      // image: require('./path_to_jesus_image.png'), // Path to the image file
+      nextMessage: 'next message here...', // The next message they would say
+      currentSpeaker: false,
+      thinking: true,
+    },
+    {
+      agentName: 'Buddha',
+      eagerness: 3,
+      // image: require('./path_to_buddha_image.png'),
+      nextMessage: 'next message here...',
+      currentSpeaker: false,
+      thinking: true,
+    },
+    {
+      agentName: 'Muhammad',
+      eagerness: 2,
+      // image: require('./path_to_muhammad_image.png'),
+      nextMessage: 'next message here...',
+      currentSpeaker: false,
+      thinking: true,
+    }
+  ]);
 
-    const DebateTopic = ({ message }) => {
-      return <Text style={styles.debateTopic}>{message}</Text>;
-    };  
+  // keep scrolling to the bottom while output is being typed
+  useEffect(() => {
+    if (scrollViewRef.current && !isUserTouching && agentIsTyping) {
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({ animated: false });
+      }, 0); // You can adjust this delay
+    }
+  }, [chatMessages, partialResponse, isUserTouching, agentIsTyping]);
 
-    const handleUserMessage = async () => {
-        Keyboard.dismiss();
-        setChatMessages([...chatMessages, { text: "Debate Moderator:" + userInput, author: 'user' }]);
+  // Add passed in debate topic to chat history
+  // TODO: evaluate if we want this here
+  // useEffect(() => {
+  //   setChatMessages([{ text: "Debate Topic:" + route.params.selectedQuestion, author: "user" }]);
+  // }, [route.params]);
+
+  const DebateTopic = ({ message }) => {
+    return <Text style={styles.debateTopic}>{message}</Text>;
+  };
+
+  const handleUserMessage = async () => {
+    try {
+      Keyboard.dismiss();
+      if (userInput.trim() !== '') {
+        setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
         setUserInput('');
+        // TODO: need to set this in agent blocks
+        // setGptJesusIsThinking(true);
 
-        // temporary filler message changes for agents
-        
-      };
 
-    const getRandomEagerness = () => Math.floor(Math.random() * 5) + 1;
+        // const response = await axios.post('https://o82hl9pl6f.execute-api.us-west-2.amazonaws.com/production/chat', {
+        //   message: message,
+        //   history: chatMessages,
+        //   sacrilegious: sacrilegious,
+        // });
 
-    const handleAgentMessage = async (currentAgent) => {
-      setChatMessages([...chatMessages, { text: currentAgent.message, author: currentAgent.id }]);
-      setUserInput('');
-      
-      // temporary filler message changes for agents
-      const updatedAgents = agents.map(agent => {
-        if (agent.id === currentAgent.id) {
-          // Set currentSpeaker flag to true for the current agent
-          return { ...agent, currentSpeaker: true };
-        } else {
-          // Update eagerness and message for other agents
-          const newEagerness = getRandomEagerness(); // Assuming you have a function to get random eagerness
-          const newMessage = "temp rand string"; // Assuming you have a function to get a new message based on agent's id
-          return { ...agent, eagerness: newEagerness, message: newMessage, currentSpeaker: false };
-        }
-      });
+        // const chat_response = response.data.response;
+        setAgents(agents.map(agent => ({ ...agent, currentSpeaker: false, thinking: true })));
 
-      setAgents(updatedAgents);
-    };
-      
+        // TODO: move to handle agent message block
+        // setPartialResponse('');
+
+        // setGptJesusIsTyping(true);
+
+        // const paragraphs = chat_response.split('\n\n');
+        // for (let i = 0; i < paragraphs.length; i++) {
+        //   let paragraph = paragraphs[i];
+        //   for (let j = 1; j <= paragraph.length; j++) {
+        //     await new Promise((resolve) => setTimeout(resolve, 10)); // Adjust delay as needed
+        //     setPartialResponse(paragraph.slice(0, j));
+        //   }
+        //   setChatMessages((prevMessages) => [
+        //     ...prevMessages,
+        //     { text: paragraph, isUser: false, isLast: i === paragraphs.length - 1 },
+        //   ]);
+        //   setPartialResponse(''); // Clear partial response for next paragraph
+        // }
+
+        // setGptJesusIsTyping(false);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+      // Handle the error, such as showing a notification to the user
+    }
+  };
+
+  const getRandomEagerness = () => Math.floor(Math.random() * 5) + 1;
+
+  const handleAgentMessage = async (currentAgent) => {
+    setChatMessages([...chatMessages, { text: currentAgent.message, author: currentAgent.agentName }]);
+    setUserInput('');
+
+    // temporary filler message changes for agents
+    const updatedAgents = agents.map(agent => {
+      if (agent.agentName === currentAgent.agentName) {
+        // Set currentSpeaker flag to true for the current agent
+        return { ...agent, currentSpeaker: true };
+      } else {
+        // Update eagerness and message for other agents
+        const newEagerness = getRandomEagerness(); // Assuming you have a function to get random eagerness
+        const newMessage = "temp rand string"; // Assuming you have a function to get a new message based on agent's id
+        return { ...agent, eagerness: newEagerness, message: newMessage, currentSpeaker: false };
+      }
+    });
+
+    setAgents(updatedAgents);
+  };
+
+  const getMessageToShow = (msg, isTyping) => {
+    if (isTyping) {
+      return msg.author + ": " + partialResponse; // Assume partialResponse is relevant to the current typing agent
+    }
+    return msg.author + ": " + msg.text;
+  };
+
+  // Function to dynamically determine the style based on the agent's name
+  const getStyleForAgent = (agentName) => {
+    switch (agentName) {
+      case 'Jesus':
+        return styles.jesusMessageStyle; // Define this style in your StyleSheet
+      case 'Buddha':
+        return styles.buddhaMessageStyle; // Define this style in your StyleSheet
+      case 'Muhammad':
+        return styles.muhammadMessageStyle; // Define this style in your StyleSheet
+      default:
+        return styles.defaultAgentMessageStyle; // Define this style in your StyleSheet
+    }
+  };
+
 
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
-      resetScrollToCoords={{ x: 0, y: 0 }}
-      scrollEnabled={false}
-      extraScrollHeight={35}
-      keyboardShouldPersistTaps="always"
+        contentContainerStyle={styles.container}
+        resetScrollToCoords={{ x: 0, y: 0 }}
+        scrollEnabled={false}
+        extraScrollHeight={35}
+        keyboardShouldPersistTaps="always"
       >
-        
+
         <DebateTopic message={"Debate Topic: " + route.params.selectedQuestion} />
 
-        {/* This is where the scrollview will go */}
-        {/* Inside the scrollview is where the logic for displaying the chat messages will be */}
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.chatContainer}
+          contentContainerStyle={styles.chatContentContainer}
+          onScrollBeginDrag={() => setIsUserTouching(true)}
+          onScrollEndDrag={() => setIsUserTouching(false)}
+        >
+          {chatMessages.map((msg, index) => (
+
+            msg.author === "user" ? (
+              <Text key={index} style={[styles.message, styles.userMessage]}>{msg.text}</Text>
+            ) : (
+              // Use the getStyleForAgent function to dynamically set the style
+              <View key={index} style={msg.isLast ? null : styles.systemMessageContainer}>
+                <Text style={[styles.message, getStyleForAgent(msg.author)]}>
+                  {getMessageToShow(msg)}
+                </Text>
+              </View>
+            )
+
+
+          ))}
+          {/* This can be used for the blocks at the bottom */}
+          {/* {gptJesusIsThinking && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
+            <TypingIndicator />
+            <Text style={[styles.message, styles.gptJesusMessage]}>
+            </Text>
+          </View>
+        )} */}
+        </ScrollView>
 
       </KeyboardAwareScrollView>
 
       {/* AgentView component */}
-      <AgentView 
+      <AgentView
         agents={agents} // Pass the array of agents with their details
         onAgentSelect={handleAgentMessage} // Function to handle agent selection
       />
-      
+
 
       <View style={styles.inputContainer}
-      color="#FFFFFF"
+        color="#FFFFFF"
       >
         <TextInput
-        style={styles.input}
-        value={userInput}
-        onChangeText={setUserInput}
-        placeholder="Type your message"
-        placeholderTextColor="#B3B3B3"
-        onSubmitEditing={handleUserMessage} 
+          style={styles.input}
+          value={userInput}
+          onChangeText={setUserInput}
+          placeholder="Type your message"
+          placeholderTextColor="#B3B3B3"
+          onSubmitEditing={handleUserMessage}
         />
         <TouchableOpacity style={styles.sendButton} onPress={() => {
-        handleUserMessage();
-        Keyboard.dismiss();
+          handleUserMessage();
+          Keyboard.dismiss();
         }}>
-        <Text style={styles.buttonText} color='white'>Send</Text>
+          <Text style={styles.buttonText} color='white'>Send</Text>
         </TouchableOpacity>
       </View>
 
@@ -125,16 +228,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#181818',
   },
-    inputContainer: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    paddingBottom:25,
+    paddingBottom: 25,
     borderTopWidth: 1,
     borderTopColor: '#ccc',
   },
-    input: {
+  input: {
     flex: 1,
     borderWidth: 1,
     backgroundColor: '#202020',
@@ -194,6 +297,54 @@ const styles = StyleSheet.create({
   },
   agentText: {
     // Styling for the text or number inside the circle
+  },
+
+  chatContainer: {
+    flex: 1,
+  },
+  gptJesusMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#f1f1f1',
+    color: '#333',
+    maxWidth: "70%"
+  },
+  message: {
+    margin: 10,
+    padding: 10,
+    borderRadius: 5,
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#3498db',
+    color: '#fff',
+    maxWidth: "70%"
+  },
+  jesusMessageStyle: {
+    backgroundColor: '#4169E1', // A strong royal blue
+    color: '#FFFFFF', // White text color for better readability
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 2,
+    alignSelf: 'flex-start',
+    maxWidth: '70%',
+  },
+  buddhaMessageStyle: {
+    backgroundColor: '#FFA500', // A Saffron Orange, similar to monk's wear
+    color: '#FFFFFF', // White text color for better readability
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 2,
+    alignSelf: 'flex-start',
+    maxWidth: '70%',
+  },
+  muhammadMessageStyle: {
+    backgroundColor: '#008000', // A deep verdant green
+    color: '#FFFFFF', // White text color for better readability
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 2,
+    alignSelf: 'flex-start',
+    maxWidth: '70%',
   },
 
 });

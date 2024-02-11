@@ -1,14 +1,15 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
-import Welcome from './Welcome'; 
-import Debate from './Debate'; 
-import React from 'react';
+import Welcome from './Welcome';
+import Debate from './Debate';
+import React, { createContext, useState, useEffect } from 'react';
 import * as Font from "expo-font";
 
 const Stack = createStackNavigator();
 
 export default function App() {
+
 
   const confirmBack = (navigation) => {
     Alert.alert(
@@ -32,45 +33,45 @@ export default function App() {
     Font.loadAsync({
       "FantaisieArtistique": require("./assets/fonts/FantaisieArtistique.ttf"),
     })
-    .then(() => {
-     setFontLoaded(true)
-    }) 
+      .then(() => {
+        setFontLoaded(true)
+      })
   }, [])
 
   if (!fontLoaded) return null
 
-  
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#282828', // Custom background color
-          },
-          headerTintColor: '#fff', // Custom text color
-        }}>
-        <Stack.Screen 
-        name=" " 
-        options={{
-          headerStyle: {
-            height: 60, // Smaller height for welcome screen
-            backgroundColor: '#282828',
-          }
-        }} 
-        component={Welcome} />
-        <Stack.Screen 
-          name="Debate" 
-          component={Debate} 
-          options={({ navigation }) => ({
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => confirmBack(navigation)}>
-                <Text style={{ marginLeft: 10, color: '#fff' }}>Restart</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#282828', // Custom background color
+            },
+            headerTintColor: '#fff', // Custom text color
+          }}>
+          <Stack.Screen
+            name=" "
+            options={{
+              headerStyle: {
+                height: 60, // Smaller height for welcome screen
+                backgroundColor: '#282828',
+              }
+            }}
+            component={Welcome} />
+          <Stack.Screen
+            name="Debate"
+            component={Debate}
+            options={({ navigation }) => ({
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => confirmBack(navigation)}>
+                  <Text style={{ marginLeft: 10, color: '#fff' }}>Restart</Text>
+                </TouchableOpacity>
+              ),
+            })}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 
