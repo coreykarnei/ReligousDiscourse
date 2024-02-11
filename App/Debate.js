@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     maxWidth: "70%"
   },
   jesusMessageStyle: {
-    backgroundColor: '#4169E1', // A strong royal blue
+    backgroundColor: '#0000E7', // A strong royal blue
     color: '#FFFFFF', // White text color for better readability
     padding: 10,
     borderRadius: 5,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
   },
   buddhaMessageStyle: {
-    backgroundColor: '#FFA500', // A Saffron Orange, similar to monk's wear
+    backgroundColor: '#CC5500', // A Saffron Orange, similar to monk's wear
     color: '#FFFFFF', // White text color for better readability
     padding: 10,
     borderRadius: 5,
