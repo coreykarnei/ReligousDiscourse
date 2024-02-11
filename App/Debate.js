@@ -240,6 +240,7 @@ const Debate = ({ navigation, route }) => {
       <AgentView
         agents={agents} // Pass the array of agents with their details
         onAgentSelect={handleAgentMessage} // Function to handle agent selection
+        anyAgentTyping={agentIsTyping}
       />
 
 
