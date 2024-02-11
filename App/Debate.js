@@ -250,7 +250,7 @@ const Debate = ({ navigation, route }) => {
           style={styles.input}
           value={userInput}
           onChangeText={setUserInput}
-          placeholder="Moderate the debate..."
+          placeholder="Contribute to the discussion..."
           placeholderTextColor="#B3B3B3"
           onSubmitEditing={handleUserMessage}
         />
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     // Styles for AI agent indicators
   },
   sendButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#E84B4F',
     color: "#FFFFFF",
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#3498db',
+    backgroundColor: '#36454F',
     color: '#fff',
     maxWidth: "70%"
   },

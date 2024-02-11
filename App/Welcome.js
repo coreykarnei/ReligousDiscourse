@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   customButton: {
     marginTop: 0,
-    backgroundColor: '#007AFF', // Button color
+    backgroundColor: '#E84B4F', // Button color
     bottom: 0, 
     paddingVertical: 12,
     paddingHorizontal: 20,
