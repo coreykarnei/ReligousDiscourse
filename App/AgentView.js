@@ -27,7 +27,7 @@ const ThinkingAnimation = () => {
       autoPlay
       loop={false}
       onAnimationFinish={handleAnimationFinish}
-      style={{ width: 35, height: 35 }}
+      style={{ width: 35, height: 35, marginLeft: -3}}
     />
   );
 };
@@ -39,7 +39,7 @@ const IdeaAnimation = () => {
       source={require('./assets/lottie/lightbulb.json')}
       autoPlay
       loop={true}
-      style={{ width: 45, height: 45 }}
+      style={{ width: 45, height: 45, marginLeft: -7, marginRight: -6 }}
     />
   );
 };
@@ -69,7 +69,7 @@ const ReadingAnimation = () => {
       autoPlay
       loop={false}
       onAnimationFinish={handleAnimationFinish}
-      style={{ width: 35, height: 35 }}
+      style={{ width: 35, height: 35, marginLeft: -3 }}
     />
   );
 };
@@ -103,11 +103,26 @@ const getDarkerColorForAgent = (agentName) => {
 
 const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
 
+  // const getTextForAgent = (agent) => {
+  //   if (anyAgentTyping) {
+  //     return `${agent.agentName} is reading...`; // Removed the static ellipsis
+  //   } else if (agent.thinking) {
+  //     return `${agent.agentName} is thinking...`;
+  //   } else {
+  //     return `${agent.agentName}: ${agent.nextMessage.substring(0, 20)}`;
+  //   }
+  // };
+
   const getTextForAgent = (agent) => {
+    // Check if there's a typing message for the agent
     if (anyAgentTyping) {
-      return `${agent.agentName} is reading...`; // Removed the static ellipsis
+      return `${agent.agentName} is reading...`;
     } else if (agent.thinking) {
       return `${agent.agentName} is thinking...`;
+    // } else if (typingMessage) {
+    //   // Once typing is complete, display the beginning of the nextMessage
+    //   // Adjust the substring length as needed based on your UI design
+    //   return `${agent.agentName}: ${typingMessage}`;
     } else {
       return `${agent.agentName}: ${agent.nextMessage.substring(0, 20)}`;
     }

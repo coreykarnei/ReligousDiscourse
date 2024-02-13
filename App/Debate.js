@@ -16,30 +16,29 @@ const Debate = ({ navigation, route }) => {
   const [agents, setAgents] = useState([
     {
       agentName: 'Jesus',
-      eagerness: 3,
-      // image: require('./path_to_jesus_image.png'), // Path to the image file
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
     },
     {
       agentName: 'Buddha',
-      eagerness: 3,
-      // image: require('./path_to_buddha_image.png'),
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
     },
     {
       agentName: 'Muhammad',
-      eagerness: 2,
-      // image: require('./path_to_muhammad_image.png'),
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
     }
   ]);
 
+  useEffect(() => {
+    // This code will run once when the component mounts
+    agents.forEach(agent => fetchAgentResponse(agent));
+  }, []); // The empty array ensures this effect runs only once on mount
+  
   // keep scrolling to the bottom while output is being typed
   useEffect(() => {
     if (scrollViewRef.current && !isUserTouching && agentIsTyping && isAtBottom) {
@@ -49,14 +48,21 @@ const Debate = ({ navigation, route }) => {
     }
   }, [chatMessages, partialResponse, isUserTouching, agentIsTyping, isAtBottom]);
 
-  // Add passed in debate topic to chat history
-  // TODO: evaluate if we want this here
-  // useEffect(() => {
-  //   setChatMessages([{ text: "Debate Topic:" + route.params.selectedQuestion, author: "user" }]);
-  // }, [route.params]);
 
   const DebateTopic = ({ message }) => {
     return <Text style={styles.debateTopic}>{message}</Text>;
+  };
+
+  const fetchAgentResponse = async (agent) => {
+    // Placeholder for your API endpoint and request logic
+    // const response = await axios.post('YOUR_API_ENDPOINT', { agentName: agent.agentName, message: userInput, history: chatMessages });
+    // Simulating a response delay and updating the agent state
+    setTimeout(() => {
+      const mockResponse = `Response for ${agent.agentName}`; // Replace with response.data.nextMessage or similar
+      setAgents(prevAgents => prevAgents.map(a => 
+        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false } : a
+      ));
+    }, Math.random() * 3000 + 3000); // Simulate variable network delay
   };
 
   const handleUserMessage = async () => {
@@ -65,43 +71,16 @@ const Debate = ({ navigation, route }) => {
       if (userInput.trim() !== '') {
         setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
         setUserInput('');
-        // TODO: need to set this in agent blocks
-        // setGptJesusIsThinking(true);
+        setAgentIsTyping(false);
+        // Set all agents to thinking
+        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true }));
+        setAgents(updatedAgents);
 
-
-        // const response = await axios.post('https://o82hl9pl6f.execute-api.us-west-2.amazonaws.com/production/chat', {
-        //   message: message,
-        //   history: chatMessages,
-        //   sacrilegious: sacrilegious,
-        // });
-
-        // const chat_response = response.data.response;
-        setAgents(agents.map(agent => ({ ...agent, currentSpeaker: false, thinking: true })));
-
-        // TODO: move to handle agent message block
-        // setPartialResponse('');
-
-        // setGptJesusIsTyping(true);
-
-        // const paragraphs = chat_response.split('\n\n');
-        // for (let i = 0; i < paragraphs.length; i++) {
-        //   let paragraph = paragraphs[i];
-        //   for (let j = 1; j <= paragraph.length; j++) {
-        //     await new Promise((resolve) => setTimeout(resolve, 10)); // Adjust delay as needed
-        //     setPartialResponse(paragraph.slice(0, j));
-        //   }
-        //   setChatMessages((prevMessages) => [
-        //     ...prevMessages,
-        //     { text: paragraph, isUser: false, isLast: i === paragraphs.length - 1 },
-        //   ]);
-        //   setPartialResponse(''); // Clear partial response for next paragraph
-        // }
-
-        // setGptJesusIsTyping(false);
+        // Fetch new messages for each agent
+        agents.forEach(agent => fetchAgentResponse(agent));
       }
     } catch (error) {
       console.error("An error occurred:", error.message);
-      // Handle the error, such as showing a notification to the user
     }
   };
 
@@ -113,10 +92,13 @@ const Debate = ({ navigation, route }) => {
         // Set currentSpeaker flag to true for the current agent
         return { ...agent, currentSpeaker: true };
       } else {
-        return { ...agent, currentSpeaker: false };
+        return { ...agent, currentSpeaker: false, thinking: true };
       }
     });
     setAgents(updatedAgents);
+
+    updatedAgents.filter(agent => agent.agentName !== currentAgent.agentName)
+      .forEach(agent => fetchAgentResponse(agent));
 
     const message = currentAgent.nextMessage;
     for (let i = 1; i <= message.length; i++) {
@@ -216,22 +198,11 @@ const Debate = ({ navigation, route }) => {
           {/* Conditionally render the partialResponse if an agent is typing */}
           {agentIsTyping && (
             <View style={styles.systemMessageContainer}>
-              {/* You might not need getMessageToShow for partialResponse, 
-          or you can adjust getMessageToShow to handle partial responses appropriately */}
-
               <Text style={[styles.message, getStyleForAgent(currentTypingAgent.agentName)]}>
                 {currentTypingAgent.agentName}: {partialResponse}
               </Text>
             </View>
           )}
-          {/* This can be used for the blocks at the bottom */}
-          {/* {gptJesusIsThinking && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
-            <TypingIndicator />
-            <Text style={[styles.message, styles.gptJesusMessage]}>
-            </Text>
-          </View>
-        )} */}
         </ScrollView>
 
       </KeyboardAwareScrollView>
