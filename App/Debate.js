@@ -81,16 +81,16 @@ const Debate = ({ navigation, route }) => {
       if (userInput.trim() !== '') {
         setAgentIsTyping(true);
         setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
-        scrollViewRef.current.scrollToEnd({ animated: false });
-        setAgentIsTyping(false);
         setUserInput('');
-        setAgentIsTyping(false);
+        
         // Set all agents to thinking
         const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false, currentSpeaker: false}));
         setAgents(updatedAgents);
 
         // Fetch new messages for each agent
         agents.forEach(agent => fetchAgentResponse(agent));
+        scrollViewRef.current.scrollToEnd({ animated: false });
+        setAgentIsTyping(false);
       }
     } catch (error) {
       console.error("An error occurred:", error.message);
