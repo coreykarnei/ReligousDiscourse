@@ -104,6 +104,29 @@ const getDarkerColorForAgent = (agentName) => {
 const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
 
   const [showWaitMessage, setShowWaitMessage] = useState(false);
+  const [typingMessages, setTypingMessages] = useState({});
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newTypingMessages = { ...typingMessages };
+      
+      agents.forEach(agent => {
+        if (agent.displayPartialMessage && agent.nextMessage) {
+          const currentLength = typingMessages[agent.agentName]?.length || 0;
+          if (currentLength < agent.partialMaxLength+1) {
+            newTypingMessages[agent.agentName] = agent.nextMessage.slice(0, currentLength + 1);
+          } else {
+            agent.displayPartialMessage = false; // This should ideally be managed in a more centralized state
+            newTypingMessages[agent.agentName] = ''
+          }
+        }
+      });
+      setTypingMessages(newTypingMessages);
+    }, 10); // Adjust delay as needed
+
+    return () => clearInterval(interval);
+  }, [agents, typingMessages]);
+
 
   // Function to handle button press
   const handlePress = (agent) => {
@@ -117,17 +140,15 @@ const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
   };
 
   const getTextForAgent = (agent) => {
-    // Check if there's a typing message for the agent
+    // Modified to check and display the typing message if present
     if (anyAgentTyping) {
       return `${agent.agentName} is reading...`;
     } else if (agent.thinking) {
       return `${agent.agentName} is thinking...`;
-    // } else if (typingMessage) {
-    //   // Once typing is complete, display the beginning of the nextMessage
-    //   // Adjust the substring length as needed based on your UI design
-    //   return `${agent.agentName}: ${typingMessage}`;
+    } else if (agent.displayPartialMessage) {
+      return `${agent.agentName}: ${typingMessages[agent.agentName]}`;
     } else {
-      return `${agent.agentName}: ${agent.nextMessage.substring(0, 20)}`;
+      return `${agent.agentName}: ${agent.nextMessage?.substring(0, agent.partialMaxLength) || ''}...`;
     }
   };
 

@@ -20,6 +20,8 @@ const Debate = ({ navigation, route }) => {
       currentSpeaker: false,
       thinking: true,
       buttonClickable: false,
+      displayPartialMessage: false,
+      partialMaxLength: 40,
     },
     {
       agentName: 'Buddha',
@@ -27,6 +29,8 @@ const Debate = ({ navigation, route }) => {
       currentSpeaker: false,
       thinking: true,
       buttonClickable: false,
+      displayPartialMessage: false,
+      partialMaxLength: 37,
     },
     {
       agentName: 'Muhammad',
@@ -34,6 +38,8 @@ const Debate = ({ navigation, route }) => {
       currentSpeaker: false,
       thinking: true,
       buttonClickable: false,
+      displayPartialMessage: false,
+      partialMaxLength: 32,
     }
   ]);
 
@@ -60,10 +66,11 @@ const Debate = ({ navigation, route }) => {
     // Placeholder for your API endpoint and request logic
     // const response = await axios.post('YOUR_API_ENDPOINT', { agentName: agent.agentName, message: userInput, history: chatMessages });
     // Simulating a response delay and updating the agent state
+
     setTimeout(() => {
-      const mockResponse = `Response for ${agent.agentName}`; // Replace with response.data.nextMessage or similar
+      const mockResponse = `Mock response for ${agent.agentName}. This message is long to test how the partial message displaying works.`; // Replace with response.data.nextMessage or similar
       setAgents(prevAgents => prevAgents.map(a => 
-        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true} : a
+        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true, displayPartialMessage: true} : a
       ));
     }, Math.random() * 3000 + 3000); // Simulate variable network delay
   };
@@ -76,7 +83,7 @@ const Debate = ({ navigation, route }) => {
         setUserInput('');
         setAgentIsTyping(false);
         // Set all agents to thinking
-        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false}));
+        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false, currentSpeaker: false}));
         setAgents(updatedAgents);
 
         // Fetch new messages for each agent
@@ -116,9 +123,6 @@ const Debate = ({ navigation, route }) => {
 
     setPartialResponse('');
     setAgentIsTyping(false);
-
-    // TODO: trigger the non-speakers to load a new nextMessage
-
   };
 
   const handleScroll = (event) => {
@@ -225,7 +229,7 @@ const Debate = ({ navigation, route }) => {
           style={styles.input}
           value={userInput}
           onChangeText={setUserInput}
-          placeholder="Contribute to the discussion..."
+          placeholder="Contribute to the conversation..."
           placeholderTextColor="#B3B3B3"
           onSubmitEditing={handleUserMessage}
         />
