@@ -19,18 +19,21 @@ const Debate = ({ navigation, route }) => {
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
+      buttonClickable: false,
     },
     {
       agentName: 'Buddha',
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
+      buttonClickable: false,
     },
     {
       agentName: 'Muhammad',
       nextMessage: 'next message here...',
       currentSpeaker: false,
       thinking: true,
+      buttonClickable: false,
     }
   ]);
 
@@ -60,7 +63,7 @@ const Debate = ({ navigation, route }) => {
     setTimeout(() => {
       const mockResponse = `Response for ${agent.agentName}`; // Replace with response.data.nextMessage or similar
       setAgents(prevAgents => prevAgents.map(a => 
-        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false } : a
+        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true} : a
       ));
     }, Math.random() * 3000 + 3000); // Simulate variable network delay
   };
@@ -73,7 +76,7 @@ const Debate = ({ navigation, route }) => {
         setUserInput('');
         setAgentIsTyping(false);
         // Set all agents to thinking
-        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true }));
+        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false}));
         setAgents(updatedAgents);
 
         // Fetch new messages for each agent
@@ -90,9 +93,9 @@ const Debate = ({ navigation, route }) => {
     const updatedAgents = agents.map(agent => {
       if (agent.agentName === currentAgent.agentName) {
         // Set currentSpeaker flag to true for the current agent
-        return { ...agent, currentSpeaker: true };
+        return { ...agent, currentSpeaker: true, buttonClickable: false };
       } else {
-        return { ...agent, currentSpeaker: false, thinking: true };
+        return { ...agent, currentSpeaker: false, thinking: true, buttonClickable: false };
       }
     });
     setAgents(updatedAgents);

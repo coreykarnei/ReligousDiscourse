@@ -103,15 +103,18 @@ const getDarkerColorForAgent = (agentName) => {
 
 const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
 
-  // const getTextForAgent = (agent) => {
-  //   if (anyAgentTyping) {
-  //     return `${agent.agentName} is reading...`; // Removed the static ellipsis
-  //   } else if (agent.thinking) {
-  //     return `${agent.agentName} is thinking...`;
-  //   } else {
-  //     return `${agent.agentName}: ${agent.nextMessage.substring(0, 20)}`;
-  //   }
-  // };
+  const [showWaitMessage, setShowWaitMessage] = useState(false);
+
+  // Function to handle button press
+  const handlePress = (agent) => {
+    if (agent.buttonClickable) {
+      onAgentSelect(agent);
+    } else {
+      // Show wait message
+      setShowWaitMessage(true);
+      setTimeout(() => setShowWaitMessage(false), 2000); // Hide after 2 seconds
+    }
+  };
 
   const getTextForAgent = (agent) => {
     // Check if there's a typing message for the agent
@@ -129,13 +132,16 @@ const AgentView = ({ agents, onAgentSelect, anyAgentTyping }) => {
   };
 
   return (
-    <View style={styles.agentContainer}>
+    <View style={styles.agentViewContainer}>
+      {showWaitMessage && (
+        <Text style={styles.waitMessage}>Please wait...</Text>
+      )}
       {agents.filter(agent => !agent.currentSpeaker).map((agent, index) => (
         <View key={agent.agentName} style={styles.agentWrapper}>
           <View style={[styles.trim, { backgroundColor: getDarkerColorForAgent(agent.agentName) }]} />
           <TouchableOpacity
             style={[styles.agentButton, { backgroundColor: getBackgroundColorForAgent(agent.agentName) }]}
-            onPress={() => onAgentSelect(agent)}
+            onPress={() => handlePress(agent)}
           >
             {anyAgentTyping ? (
               <ReadingAnimation />
@@ -174,6 +180,14 @@ const styles = StyleSheet.create({
     color: '#D3D3D3',
     marginLeft: 10,
     flex: 1,
+  },
+  waitMessage: {
+    alignSelf: 'center', // Center horizontally
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    color: 'white',
+    padding: 8,
+    borderRadius: 5,
+    marginBottom: 5, // Space above the AgentView
   },
   trim: {
     height: 4,
