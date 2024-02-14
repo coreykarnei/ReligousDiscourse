@@ -79,7 +79,10 @@ const Debate = ({ navigation, route }) => {
     try {
       Keyboard.dismiss();
       if (userInput.trim() !== '') {
+        setAgentIsTyping(true);
         setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
+        scrollViewRef.current.scrollToEnd({ animated: false });
+        setAgentIsTyping(false);
         setUserInput('');
         setAgentIsTyping(false);
         // Set all agents to thinking
@@ -110,9 +113,10 @@ const Debate = ({ navigation, route }) => {
     updatedAgents.filter(agent => agent.agentName !== currentAgent.agentName)
       .forEach(agent => fetchAgentResponse(agent));
 
+    scrollViewRef.current.scrollToEnd({ animated: false });
     const message = currentAgent.nextMessage;
     for (let i = 1; i <= message.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 10)); // Adjust delay as needed
+      await new Promise((resolve) => setTimeout(resolve, 2)); // Adjust delay as needed
       setPartialResponse(message.slice(0, i));
     }
 
