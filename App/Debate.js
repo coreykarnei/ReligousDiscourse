@@ -47,7 +47,7 @@ const Debate = ({ navigation, route }) => {
     // This code will run once when the component mounts
     agents.forEach(agent => fetchAgentResponse(agent));
   }, []); // The empty array ensures this effect runs only once on mount
-  
+
   // keep scrolling to the bottom while output is being typed
   useEffect(() => {
     if (scrollViewRef.current && !isUserTouching && agentIsTyping && isAtBottom) {
@@ -69,8 +69,8 @@ const Debate = ({ navigation, route }) => {
 
     setTimeout(() => {
       const mockResponse = `Mock response for ${agent.agentName}. This message is long to test how the partial message displaying works.`; // Replace with response.data.nextMessage or similar
-      setAgents(prevAgents => prevAgents.map(a => 
-        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true, displayPartialMessage: true} : a
+      setAgents(prevAgents => prevAgents.map(a =>
+        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true, displayPartialMessage: true } : a
       ));
     }, Math.random() * 3000 + 3000); // Simulate variable network delay
   };
@@ -80,22 +80,24 @@ const Debate = ({ navigation, route }) => {
       Keyboard.dismiss();
       if (userInput.trim() !== '') {
         setAgentIsTyping(true);
+        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false, currentSpeaker: false }));
+        setAgents(updatedAgents);
         setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
         setUserInput('');
         
-        // Set all agents to thinking
-        const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false, currentSpeaker: false}));
-        setAgents(updatedAgents);
-
         // Fetch new messages for each agent
         agents.forEach(agent => fetchAgentResponse(agent));
-        scrollViewRef.current.scrollToEnd({ animated: false });
+        
+        // Ensure UI has updated before scrolling
+        setTimeout(() => scrollViewRef.current.scrollToEnd({ animated: true }), 0);
+        
         setAgentIsTyping(false);
       }
     } catch (error) {
       console.error("An error occurred:", error.message);
     }
   };
+  
 
   const handleAgentMessage = async (currentAgent) => {
     setAgentIsTyping(true);
@@ -191,7 +193,12 @@ const Debate = ({ navigation, route }) => {
           onScroll={handleScroll}
           onScrollBeginDrag={() => setIsUserTouching(true)}
           onScrollEndDrag={() => setIsUserTouching(false)}
-          scrollEventThrottle={16} // Aim for 60fps updates
+          scrollEventThrottle={16}
+          onContentSizeChange={() => {
+            if (!isUserTouching && agentIsTyping && isAtBottom) {
+              scrollViewRef.current.scrollToEnd({ animated: true });
+            }
+          }}
         >
           {chatMessages.map((msg, index) => (
 
