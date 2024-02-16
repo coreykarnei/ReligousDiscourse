@@ -45,7 +45,7 @@ const Debate = ({ navigation, route }) => {
 
   useEffect(() => {
     // This code will run once when the component mounts
-    agents.forEach(agent => fetchAgentResponse(agent));
+    agents.forEach(agent => fetchAgentResponse(agent, null));
   }, []); // The empty array ensures this effect runs only once on mount
 
   // keep scrolling to the bottom while output is being typed
@@ -62,18 +62,37 @@ const Debate = ({ navigation, route }) => {
     return <Text style={styles.debateTopic}>{message}</Text>;
   };
 
-  const fetchAgentResponse = async (agent) => {
-    // Placeholder for your API endpoint and request logic
-    // const response = await axios.post('YOUR_API_ENDPOINT', { agentName: agent.agentName, message: userInput, history: chatMessages });
-    // Simulating a response delay and updating the agent state
+  const fetchAgentResponse = async (agent, latestMessage) => {
+    // Placeholder for the actual implementation
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agentName: agent.agentName, // Include the agent's name
+        history: chatMessages, // Chat history to provide context
+        latestMessage: latestMessage,
+        debateTopic: route.params.selectedQuestion,
+      }),
+    };
 
-    setTimeout(() => {
-      const mockResponse = `Mock response for ${agent.agentName}. This message is long to test how the partial message displaying works.`; // Replace with response.data.nextMessage or similar
+    try {
+      // Update this URL to your actual API endpoint
+      const response = await fetch('http://127.0.0.1:5000/get-agent-response', requestOptions);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+
+      // Assuming your backend returns a JSON with a 'response' field
+      const agentResponse = data.response;
+
+      // Update the agent state with the new message
       setAgents(prevAgents => prevAgents.map(a =>
-        a.agentName === agent.agentName ? { ...a, nextMessage: mockResponse, thinking: false, buttonClickable: true, displayPartialMessage: true } : a
+        a.agentName === agent.agentName ? { ...a, nextMessage: agentResponse, thinking: false, buttonClickable: true, displayPartialMessage: true } : a
       ));
-    }, Math.random() * 3000 + 3000); // Simulate variable network delay
+    } catch (error) {
+      console.error("An error occurred while fetching agent response:", error.message);
+    }
   };
+
 
   const handleUserMessage = async () => {
     try {
@@ -82,22 +101,22 @@ const Debate = ({ navigation, route }) => {
         setAgentIsTyping(true);
         const updatedAgents = agents.map(agent => ({ ...agent, thinking: true, buttonClickable: false, currentSpeaker: false }));
         setAgents(updatedAgents);
-        setChatMessages([...chatMessages, { text: userInput, author: 'user' }]);
-        setUserInput('');
-        
+        setChatMessages([...chatMessages, { text: userInput, author: 'User' }]);
+
         // Fetch new messages for each agent
-        agents.forEach(agent => fetchAgentResponse(agent));
-        
+        agents.forEach(agent => fetchAgentResponse(agent, {'text': userInput, 'author': 'User'}));
+        setUserInput('');
+
         // Ensure UI has updated before scrolling
         setTimeout(() => scrollViewRef.current.scrollToEnd({ animated: true }), 0);
-        
+
         setAgentIsTyping(false);
       }
     } catch (error) {
       console.error("An error occurred:", error.message);
     }
   };
-  
+
 
   const handleAgentMessage = async (currentAgent) => {
     setAgentIsTyping(true);
@@ -113,12 +132,12 @@ const Debate = ({ navigation, route }) => {
     setAgents(updatedAgents);
 
     updatedAgents.filter(agent => agent.agentName !== currentAgent.agentName)
-      .forEach(agent => fetchAgentResponse(agent));
+    .forEach(agent => fetchAgentResponse(agent, {'text': currentAgent.nextMessage, 'author': currentAgent.agentName}));
 
     scrollViewRef.current.scrollToEnd({ animated: false });
     const message = currentAgent.nextMessage;
     for (let i = 1; i <= message.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 2)); // Adjust delay as needed
+      await new Promise((resolve) => setTimeout(resolve, 0.5)); // Adjust delay as needed
       setPartialResponse(message.slice(0, i));
     }
 
@@ -129,6 +148,7 @@ const Debate = ({ navigation, route }) => {
 
     setPartialResponse('');
     setAgentIsTyping(false);
+
   };
 
   const handleScroll = (event) => {
@@ -202,7 +222,7 @@ const Debate = ({ navigation, route }) => {
         >
           {chatMessages.map((msg, index) => (
 
-            msg.author === "user" ? (
+            msg.author === "User" ? (
               <Text key={index} style={[styles.message, styles.userMessage]}>{msg.text}</Text>
             ) : (
               // Use the getStyleForAgent function to dynamically set the style
