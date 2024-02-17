@@ -10,6 +10,7 @@ const Debate = ({ navigation, route }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const scrollViewRef = React.useRef(null);
   const [isUserTouching, setIsUserTouching] = useState(false);
+  const [localDevelopment, setLocalDevelopment] = useState(false);
   const debateTopicRef = useRef(null);
   const [dynamicPadding, setDynamicPadding] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -77,8 +78,13 @@ const Debate = ({ navigation, route }) => {
 
     try {
       // Update this URL to your actual API endpoint
-      const response = await fetch('http://127.0.0.1:5000/get-agent-response', requestOptions);
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (localDevelopment)
+        requestURL = "http://127.0.0.1:5000/get_agent_response";
+      else
+        requestURL = "https://hidoxyixh2.execute-api.us-west-2.amazonaws.com/production/get_agent_response";
+        const response = await fetch(requestURL, requestOptions);
+      // const response = await fetch(requestURL, requestOptions);
+      if (!response.ok) throw new Error('Network response was not ok', response.json().error);
       const data = await response.json();
 
       // Assuming your backend returns a JSON with a 'response' field

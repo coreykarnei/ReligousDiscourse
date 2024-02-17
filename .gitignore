@@ -1,2 +1,5 @@
-.DS_STore
+.DS_Store
 __pycache__/*
+zappa_settings.json
+secret_key
+temp

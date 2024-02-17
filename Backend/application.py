@@ -2,17 +2,23 @@ import os
 import openai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import logging
+
 
 application = Flask(__name__)
 CORS(application)
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
 openai.api_key = os.environ['OPENAI_ACCESS_KEY']
 
-@application.route("/get-agent-response", methods=["POST"])
-def chat():
+@application.route("/get_agent_response", methods=["POST"])
+def get_agent_response():
+    logger.info('Starting Lambda execution')
     data = request.get_json()
     chat_history = data.get("history")
-    agent_name = data.get("agentName")  # Now we also get the agent's name from the request'
+    agent_name = data.get("agentName")
     latest_message = data.get("latestMessage")
     debate_topic = data.get("debateTopic")
 
@@ -39,6 +45,7 @@ def chat():
     if latest_message:
         messages.append({"role": "user" if (latest_message['author'] != agent_name) else "system", "content": f"{latest_message['author']}: {latest_message['text']}"})
 
+    logger.info('Hitting OpenAI endpoint')
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -52,6 +59,7 @@ def chat():
         chat_response = response['choices'][0]['message']['content'].strip()
 
     except Exception as e:
+        logger.debug('Error generating response', e)
         return jsonify({"error": "Error generating response"}), 500
 
     if ': ' in chat_response[:15]:
@@ -60,6 +68,7 @@ def chat():
         # Update the message to be everything after ': '
         chat_response = chat_response[colon_position + 2:]
     
+    logger.info('Returning chat response')
     return jsonify({"response": chat_response})
     # return jsonify({"response": f"temp message for {agent_name}"})
 
