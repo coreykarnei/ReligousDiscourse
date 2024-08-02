@@ -24,9 +24,9 @@ def get_agent_response():
 
     # Define unique system prompts for each agent
     system_prompts = {
-        'Jesus': "[Write your next reply from the point of view of Jesus Christ and only Jesus. Write 1 reply only in internet RP style from the point of view of Jesus Christ having a friendly debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 6 sentences or less",
-        'Buddha': "[Write your next reply from the point of view of The Buddha and only Buddha. Write 1 reply only in internet RP style from the point of view of The Buddha having a friendly debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 6 sentences or less",
-        'Muhammad': "[Write your next reply from the point of view of Muhammad and only Muhammad. Write 1 reply only in internet RP style from the point of view of Muhammad having a friendly debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 6 sentences or less"
+        'Jesus': "[Write your next reply from the point of view of Jesus Christ and only Jesus. Write 1 reply only in internet RP style from the point of view of Jesus Christ having a passionate debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 4 sentences or less. Be sure to focus on the ways that your philosophy and beliefs are differnet to that presented by your debate partners.",
+        'Buddha': "[Write your next reply from the point of view of The Buddha and only Buddha. Write 1 reply only in internet RP style from the point of view of The Buddha having a passionate debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 4 sentences or less. Be sure to focus on the ways that your philosophy and beliefs are differnet to that presented by your debate partners.",
+        'Muhammad': "[Write your next reply from the point of view of Muhammad and only Muhammad. Write 1 reply only in internet RP style from the point of view of Muhammad having a passionate debate about who's religious philosphy is correct. Debaters who use too many words are HEAVILY penalized. Write a response that directly addresses the message of the most recent speaker. Message must be 4 sentences or less. Be sure to focus on the ways that your philosophy and beliefs are differnet to that presented by your debate partners."
     }
 
     # Choose the system prompt based on the agent's name
@@ -53,7 +53,7 @@ def get_agent_response():
             max_tokens=500,
             n=1,
             stop=None,
-            temperature=0.8,
+            temperature=0.7,
         )
 
         chat_response = response['choices'][0]['message']['content'].strip()
